@@ -1,0 +1,43 @@
+name: KASPYRA Task 014 Satellite Network Stress
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'task014/**'
+      - 'task008c/**'
+      - '.github/workflows/task014-satellite-stress.yml'
+
+jobs:
+  satellite-stress:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CometBFT v0.38.17
+        run: |
+          git clone --depth 1 --branch v0.38.17 https://github.com/cometbft/cometbft.git /tmp/cometbft
+          cd /tmp/cometbft
+          go build -o /usr/local/bin/cometbft ./cmd/cometbft
+          cometbft version
+      - name: Resolve Go dependencies
+        working-directory: task008c
+        run: |
+          go mod tidy
+          go mod verify
+      - name: Run local validator network stress experiment
+        run: python task014/run_satellite_stress.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: task014-evidence
+          path: task014-result.json
+          if-no-files-found: warn
