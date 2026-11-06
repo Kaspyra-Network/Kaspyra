@@ -1,0 +1,50 @@
+name: KASPYRA Task 010A Satellite-Style Delivery
+
+on:
+  push:
+    paths:
+      - 'task008c/**'
+      - 'task010/**'
+      - '.github/workflows/task010a-network.yml'
+  pull_request:
+    paths:
+      - 'task008c/**'
+      - 'task010/**'
+      - '.github/workflows/task010a-network.yml'
+  workflow_dispatch:
+
+jobs:
+  satellite-delivery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install cryptography
+        run: python -m pip install 'cryptography>=44,<47'
+      - name: Install CometBFT v0.38.17
+        run: |
+          git clone --depth 1 --branch v0.38.17 https://github.com/cometbft/cometbft.git /tmp/cometbft
+          cd /tmp/cometbft
+          go build -o /usr/local/bin/cometbft ./cmd/cometbft
+          cometbft version
+      - name: Resolve Go dependencies (Task 009 baseline)
+        working-directory: task008c
+        run: |
+          go mod tidy
+          go mod verify
+      - name: Run real four-validator remote delivery experiments
+        run: python task010/run_satellite_delivery.py
+      - name: Upload experiment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: task010a-evidence
+          path: task010-result.json
+          if-no-files-found: warn
