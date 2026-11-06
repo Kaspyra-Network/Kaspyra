@@ -15,7 +15,20 @@ GUEST=[f'kg19{i}' for i in range(4)]
 IPS=[f'10.219.20.{i+2}' for i in range(4)]
 
 def run(*args,check=True,**kw):
-    return subprocess.run([str(x) for x in args],text=True,capture_output=True,check=check,**kw)
+    result = subprocess.run(
+        [str(x) for x in args],
+        text=True,
+        capture_output=True,
+        check=False,
+        **kw
+    )
+    if check and result.returncode:
+        raise RuntimeError(
+            f"Command failed: {args!r} (exit {result.returncode})\n"
+            f"STDOUT:\n{result.stdout[-4000:]}\n"
+            f"STDERR:\n{result.stderr[-4000:]}"
+        )
+    return result
 
 def cmd(*args): return run(*args).stdout.strip()
 def net(i,*args,**kw): return run('ip','netns','exec',NS[i],*args,**kw)
