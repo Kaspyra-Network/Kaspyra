@@ -1,0 +1,589 @@
+{
+  "capacity_basis": "equal aggregate attempts per tick, not equal physical infrastructure cost",
+  "caveats": [
+    "Task 004 retry and store_forward are functionally equivalent in this model.",
+    "Dual path assumes backup available during primary outage; no shared-fate failure modeled.",
+    "Queue memory, congestion, ACK and expiry semantics are simplified.",
+    "Received means delivered to a simulated receiver, not blockchain inclusion or finality.",
+    "Seed-to-seed variability is simulated, not a statistical sample of satellite conditions."
+  ],
+  "decision": {
+    "next_gate": "Integrate with local real blockchain node; measure inclusion/finality separately, plus physical transport traces and shared-fate backup failures",
+    "retry_store_forward_equivalent_in_all_cells": true,
+    "rule": "No new L1 recommendation from transport-only experiments",
+    "threshold_examples": {
+      "baseline": {
+        "dual_delivery": 1.0,
+        "retry_delivery": 1.0
+      },
+      "capacity_1": {
+        "dual_delivery": 0.65556,
+        "retry_delivery": 0.4821
+      },
+      "outage_70ticks": {
+        "dual_delivery": 1.0,
+        "retry_delivery": 0.24537
+      },
+      "queue_12": {
+        "dual_delivery": 0.48519,
+        "retry_delivery": 0.32006
+      },
+      "ttl_12": {
+        "dual_delivery": 0.98333,
+        "retry_delivery": 0.52438
+      }
+    }
+  },
+  "scenarios": {
+    "ack_loss_60pct": {
+      "overrides": {
+        "ack_loss": 0.6
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.92037,
+          "attempts_mean": 288.7,
+          "delivery_mean": 1.0,
+          "duplicate_receipts_mean": 143.87,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.19136,
+          "attempts_mean": 60,
+          "delivery_mean": 0.49043,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 4.17,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.82284,
+          "attempts_mean": 264.57,
+          "delivery_mean": 0.99537,
+          "duplicate_receipts_mean": 119.3,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.82284,
+          "attempts_mean": 264.57,
+          "delivery_mean": 0.99537,
+          "duplicate_receipts_mean": 119.3,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "baseline": {
+      "overrides": {},
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 1.0,
+          "attempts_mean": 133.57,
+          "delivery_mean": 1.0,
+          "duplicate_receipts_mean": 10,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.45031,
+          "attempts_mean": 60,
+          "delivery_mean": 0.49043,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 4.17,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 1.0,
+          "attempts_mean": 132.87,
+          "delivery_mean": 1.0,
+          "duplicate_receipts_mean": 9.27,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 1.0,
+          "attempts_mean": 132.87,
+          "delivery_mean": 1.0,
+          "duplicate_receipts_mean": 9.27,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "capacity_1": {
+      "overrides": {
+        "capacity": 1
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.63765,
+          "attempts_mean": 90,
+          "delivery_mean": 0.65556,
+          "duplicate_receipts_mean": 4.83,
+          "expired_mean": 4.73,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.26914,
+          "attempts_mean": 36,
+          "delivery_mean": 0.29506,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 1.27,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.47593,
+          "attempts_mean": 74,
+          "delivery_mean": 0.4821,
+          "duplicate_receipts_mean": 3.37,
+          "expired_mean": 22.93,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.47593,
+          "attempts_mean": 74,
+          "delivery_mean": 0.4821,
+          "duplicate_receipts_mean": 3.37,
+          "expired_mean": 22.93,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "capacity_2": {
+      "overrides": {
+        "capacity": 2
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.99815,
+          "attempts_mean": 134.3,
+          "delivery_mean": 0.99969,
+          "duplicate_receipts_mean": 10.17,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.35833,
+          "attempts_mean": 48,
+          "delivery_mean": 0.39259,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 2.73,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.97654,
+          "attempts_mean": 132.07,
+          "delivery_mean": 0.9929,
+          "duplicate_receipts_mean": 8.63,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.97654,
+          "attempts_mean": 132.07,
+          "delivery_mean": 0.9929,
+          "duplicate_receipts_mean": 8.63,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "capacity_6": {
+      "overrides": {
+        "capacity": 6
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 1.0,
+          "attempts_mean": 133.53,
+          "delivery_mean": 1.0,
+          "duplicate_receipts_mean": 10,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.45031,
+          "attempts_mean": 60,
+          "delivery_mean": 0.49043,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 4.17,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 1.0,
+          "attempts_mean": 132.87,
+          "delivery_mean": 1.0,
+          "duplicate_receipts_mean": 9.27,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 1.0,
+          "attempts_mean": 132.87,
+          "delivery_mean": 1.0,
+          "duplicate_receipts_mean": 9.27,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "loss_40pct": {
+      "overrides": {
+        "loss": 0.4
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.9966,
+          "attempts_mean": 192.3,
+          "delivery_mean": 0.99846,
+          "duplicate_receipts_mean": 9.87,
+          "expired_mean": 0.1,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.31389,
+          "attempts_mean": 60,
+          "delivery_mean": 0.3429,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 14.2,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.98858,
+          "attempts_mean": 191.47,
+          "delivery_mean": 0.99599,
+          "duplicate_receipts_mean": 9.23,
+          "expired_mean": 0.1,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.98858,
+          "attempts_mean": 191.47,
+          "delivery_mean": 0.99599,
+          "duplicate_receipts_mean": 9.23,
+          "expired_mean": 0.1,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "loss_70pct": {
+      "overrides": {
+        "loss": 0.7
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.8034,
+          "attempts_mean": 328.73,
+          "delivery_mean": 0.84599,
+          "duplicate_receipts_mean": 4.87,
+          "expired_mean": 6.13,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.15926,
+          "attempts_mean": 60,
+          "delivery_mean": 0.17253,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 24.57,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.65525,
+          "attempts_mean": 283.03,
+          "delivery_mean": 0.71574,
+          "duplicate_receipts_mean": 3,
+          "expired_mean": 12.07,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.65525,
+          "attempts_mean": 283.03,
+          "delivery_mean": 0.71574,
+          "duplicate_receipts_mean": 3,
+          "expired_mean": 12.07,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "outage_40ticks": {
+      "overrides": {
+        "outage_end": 48,
+        "outage_start": 8
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 1.0,
+          "attempts_mean": 133.2,
+          "delivery_mean": 1.0,
+          "duplicate_receipts_mean": 9.67,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.18025,
+          "attempts_mean": 24,
+          "delivery_mean": 0.19691,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 2.73,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.99105,
+          "attempts_mean": 132.63,
+          "delivery_mean": 0.99784,
+          "duplicate_receipts_mean": 8.6,
+          "expired_mean": 0.07,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.99105,
+          "attempts_mean": 132.63,
+          "delivery_mean": 0.99784,
+          "duplicate_receipts_mean": 8.6,
+          "expired_mean": 0.07,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "outage_70ticks": {
+      "overrides": {
+        "outage_end": 78,
+        "outage_start": 8
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 1.0,
+          "attempts_mean": 133.33,
+          "delivery_mean": 1.0,
+          "duplicate_receipts_mean": 9.7,
+          "expired_mean": 0,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.18025,
+          "attempts_mean": 24,
+          "delivery_mean": 0.19691,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 2.73,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.18025,
+          "attempts_mean": 72,
+          "delivery_mean": 0.24537,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 51.07,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.18025,
+          "attempts_mean": 72,
+          "delivery_mean": 0.24537,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 51.07,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "queue_12": {
+      "overrides": {
+        "queue_limit": 12
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.48519,
+          "attempts_mean": 64.43,
+          "delivery_mean": 0.48519,
+          "duplicate_receipts_mean": 4.6,
+          "expired_mean": 0,
+          "overflow_mean": 55.6
+        },
+        "fire_once": {
+          "ack_mean": 0.24352,
+          "attempts_mean": 32.43,
+          "delivery_mean": 0.26389,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 2.5,
+          "overflow_mean": 34.67
+        },
+        "retry": {
+          "ack_mean": 0.32006,
+          "attempts_mean": 41.77,
+          "delivery_mean": 0.32006,
+          "duplicate_receipts_mean": 2.47,
+          "expired_mean": 0,
+          "overflow_mean": 73.43
+        },
+        "store_forward": {
+          "ack_mean": 0.32006,
+          "attempts_mean": 41.77,
+          "delivery_mean": 0.32006,
+          "duplicate_receipts_mean": 2.47,
+          "expired_mean": 0,
+          "overflow_mean": 73.43
+        }
+      }
+    },
+    "queue_32": {
+      "overrides": {
+        "queue_limit": 32
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.99846,
+          "attempts_mean": 133.33,
+          "delivery_mean": 0.99846,
+          "duplicate_receipts_mean": 9.9,
+          "expired_mean": 0,
+          "overflow_mean": 0.17
+        },
+        "fire_once": {
+          "ack_mean": 0.44907,
+          "attempts_mean": 59.87,
+          "delivery_mean": 0.4892,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 4.17,
+          "overflow_mean": 0.13
+        },
+        "retry": {
+          "ack_mean": 0.60895,
+          "attempts_mean": 80.73,
+          "delivery_mean": 0.60895,
+          "duplicate_receipts_mean": 5.37,
+          "expired_mean": 0,
+          "overflow_mean": 42.23
+        },
+        "store_forward": {
+          "ack_mean": 0.60895,
+          "attempts_mean": 80.73,
+          "delivery_mean": 0.60895,
+          "duplicate_receipts_mean": 5.37,
+          "expired_mean": 0,
+          "overflow_mean": 42.23
+        }
+      }
+    },
+    "roundtrip_20ticks": {
+      "overrides": {
+        "ack_latency": 10,
+        "latency": 10,
+        "timeout": 22
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.98272,
+          "attempts_mean": 132.17,
+          "delivery_mean": 0.99722,
+          "duplicate_receipts_mean": 9.13,
+          "expired_mean": 0.2,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.45031,
+          "attempts_mean": 60,
+          "delivery_mean": 0.49043,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 4.17,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.97438,
+          "attempts_mean": 131.97,
+          "delivery_mean": 0.98981,
+          "duplicate_receipts_mean": 7.43,
+          "expired_mean": 0.7,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.97438,
+          "attempts_mean": 131.97,
+          "delivery_mean": 0.98981,
+          "duplicate_receipts_mean": 7.43,
+          "expired_mean": 0.7,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "ttl_12": {
+      "overrides": {
+        "ttl": 12
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.9537,
+          "attempts_mean": 128.17,
+          "delivery_mean": 0.98333,
+          "duplicate_receipts_mean": 6.23,
+          "expired_mean": 1.8,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.45031,
+          "attempts_mean": 60,
+          "delivery_mean": 0.49043,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 7.03,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.4892,
+          "attempts_mean": 94.93,
+          "delivery_mean": 0.52438,
+          "duplicate_receipts_mean": 0.83,
+          "expired_mean": 51.37,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.4892,
+          "attempts_mean": 94.93,
+          "delivery_mean": 0.52438,
+          "duplicate_receipts_mean": 0.83,
+          "expired_mean": 51.37,
+          "overflow_mean": 0
+        }
+      }
+    },
+    "ttl_24": {
+      "overrides": {
+        "ttl": 24
+      },
+      "strategies": {
+        "dual_path": {
+          "ack_mean": 0.9892,
+          "attempts_mean": 132.13,
+          "delivery_mean": 0.99753,
+          "duplicate_receipts_mean": 9,
+          "expired_mean": 0.27,
+          "overflow_mean": 0
+        },
+        "fire_once": {
+          "ack_mean": 0.45031,
+          "attempts_mean": 60,
+          "delivery_mean": 0.49043,
+          "duplicate_receipts_mean": 0,
+          "expired_mean": 7.03,
+          "overflow_mean": 0
+        },
+        "retry": {
+          "ack_mean": 0.85864,
+          "attempts_mean": 124.47,
+          "delivery_mean": 0.91327,
+          "duplicate_receipts_mean": 2.17,
+          "expired_mean": 9.37,
+          "overflow_mean": 0
+        },
+        "store_forward": {
+          "ack_mean": 0.85864,
+          "attempts_mean": 124.47,
+          "delivery_mean": 0.91327,
+          "duplicate_receipts_mean": 2.17,
+          "expired_mean": 9.37,
+          "overflow_mean": 0
+        }
+      }
+    }
+  },
+  "synthetic": true,
+  "trials_per_cell": 30
+}
