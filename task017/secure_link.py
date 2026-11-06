@@ -92,7 +92,7 @@ def client(bind_host, bind_port, remote_host, remote_port, ca, cert, key, server
                 local.close()
                 continue
             count += 1
-            threading.Thread(target=bridge_client, args=(local, tls), daemon=True).start()
+            threading.Thread(target=bridge_client, args=(local, tls), daemon=False).start()
 
 
 def bridge_client(local, tls):
