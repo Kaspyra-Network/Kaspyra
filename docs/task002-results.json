@@ -1,0 +1,262 @@
+{
+  "metadata": {
+    "seed": 42,
+    "messages": 200,
+    "horizon_ticks": 30,
+    "deadline_ticks": 10,
+    "synthetic": true,
+    "scope": "message transport only; no satellite measurements, consensus or finality"
+  },
+  "scenarios": {
+    "nominal": {
+      "single_attempt": {
+        "on_time": 195,
+        "eventually_delivered": 195,
+        "on_time_rate": 0.975,
+        "eventual_rate": 0.975,
+        "attempts": 200,
+        "attempts_per_message": 1.0,
+        "mean_first_arrival_ticks": 0.0,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 195
+      },
+      "bounded_retry": {
+        "on_time": 200,
+        "eventually_delivered": 200,
+        "on_time_rate": 1.0,
+        "eventual_rate": 1.0,
+        "attempts": 800,
+        "attempts_per_message": 4.0,
+        "mean_first_arrival_ticks": 0.075,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 587,
+        "unique_deliveries": 200
+      },
+      "store_forward": {
+        "on_time": 200,
+        "eventually_delivered": 200,
+        "on_time_rate": 1.0,
+        "eventual_rate": 1.0,
+        "attempts": 2000,
+        "attempts_per_message": 10.0,
+        "mean_first_arrival_ticks": 0.075,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 1762,
+        "unique_deliveries": 200
+      },
+      "dual_path": {
+        "on_time": 200,
+        "eventually_delivered": 200,
+        "on_time_rate": 1.0,
+        "eventual_rate": 1.0,
+        "attempts": 4000,
+        "attempts_per_message": 20.0,
+        "mean_first_arrival_ticks": 0.0,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 3713,
+        "unique_deliveries": 200
+      }
+    },
+    "lossy_primary": {
+      "single_attempt": {
+        "on_time": 113,
+        "eventually_delivered": 113,
+        "on_time_rate": 0.565,
+        "eventual_rate": 0.565,
+        "attempts": 200,
+        "attempts_per_message": 1.0,
+        "mean_first_arrival_ticks": 0.0,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 113
+      },
+      "bounded_retry": {
+        "on_time": 189,
+        "eventually_delivered": 189,
+        "on_time_rate": 0.945,
+        "eventual_rate": 0.945,
+        "attempts": 800,
+        "attempts_per_message": 4.0,
+        "mean_first_arrival_ticks": 1.937,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 238,
+        "unique_deliveries": 189
+      },
+      "store_forward": {
+        "on_time": 189,
+        "eventually_delivered": 200,
+        "on_time_rate": 0.945,
+        "eventual_rate": 1.0,
+        "attempts": 2000,
+        "attempts_per_message": 10.0,
+        "mean_first_arrival_ticks": 2.58,
+        "recovered_after_deadline": 11,
+        "duplicate_arrivals_suppressed": 878,
+        "unique_deliveries": 200
+      },
+      "dual_path": {
+        "on_time": 200,
+        "eventually_delivered": 200,
+        "on_time_rate": 1.0,
+        "eventual_rate": 1.0,
+        "attempts": 4000,
+        "attempts_per_message": 20.0,
+        "mean_first_arrival_ticks": 0.21,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 2631,
+        "unique_deliveries": 200
+      }
+    },
+    "temporary_partition": {
+      "single_attempt": {
+        "on_time": 0,
+        "eventually_delivered": 0,
+        "on_time_rate": 0.0,
+        "eventual_rate": 0.0,
+        "attempts": 200,
+        "attempts_per_message": 1.0,
+        "mean_first_arrival_ticks": null,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 0
+      },
+      "bounded_retry": {
+        "on_time": 0,
+        "eventually_delivered": 0,
+        "on_time_rate": 0.0,
+        "eventual_rate": 0.0,
+        "attempts": 800,
+        "attempts_per_message": 4.0,
+        "mean_first_arrival_ticks": null,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 0
+      },
+      "store_forward": {
+        "on_time": 0,
+        "eventually_delivered": 200,
+        "on_time_rate": 0.0,
+        "eventual_rate": 1.0,
+        "attempts": 2000,
+        "attempts_per_message": 10.0,
+        "mean_first_arrival_ticks": 12.3,
+        "recovered_after_deadline": 200,
+        "duplicate_arrivals_suppressed": 879,
+        "unique_deliveries": 200
+      },
+      "dual_path": {
+        "on_time": 0,
+        "eventually_delivered": 200,
+        "on_time_rate": 0.0,
+        "eventual_rate": 1.0,
+        "attempts": 4000,
+        "attempts_per_message": 20.0,
+        "mean_first_arrival_ticks": 12.03,
+        "recovered_after_deadline": 200,
+        "duplicate_arrivals_suppressed": 1963,
+        "unique_deliveries": 200
+      }
+    },
+    "primary_path_outage": {
+      "single_attempt": {
+        "on_time": 0,
+        "eventually_delivered": 0,
+        "on_time_rate": 0.0,
+        "eventual_rate": 0.0,
+        "attempts": 200,
+        "attempts_per_message": 1.0,
+        "mean_first_arrival_ticks": null,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 0
+      },
+      "bounded_retry": {
+        "on_time": 0,
+        "eventually_delivered": 0,
+        "on_time_rate": 0.0,
+        "eventual_rate": 0.0,
+        "attempts": 800,
+        "attempts_per_message": 4.0,
+        "mean_first_arrival_ticks": null,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 0
+      },
+      "store_forward": {
+        "on_time": 0,
+        "eventually_delivered": 200,
+        "on_time_rate": 0.0,
+        "eventual_rate": 1.0,
+        "attempts": 2000,
+        "attempts_per_message": 10.0,
+        "mean_first_arrival_ticks": 18.24,
+        "recovered_after_deadline": 200,
+        "duplicate_arrivals_suppressed": 528,
+        "unique_deliveries": 200
+      },
+      "dual_path": {
+        "on_time": 200,
+        "eventually_delivered": 200,
+        "on_time_rate": 1.0,
+        "eventual_rate": 1.0,
+        "attempts": 4000,
+        "attempts_per_message": 20.0,
+        "mean_first_arrival_ticks": 0.285,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 2344,
+        "unique_deliveries": 200
+      }
+    },
+    "full_partition": {
+      "single_attempt": {
+        "on_time": 0,
+        "eventually_delivered": 0,
+        "on_time_rate": 0.0,
+        "eventual_rate": 0.0,
+        "attempts": 200,
+        "attempts_per_message": 1.0,
+        "mean_first_arrival_ticks": null,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 0
+      },
+      "bounded_retry": {
+        "on_time": 0,
+        "eventually_delivered": 0,
+        "on_time_rate": 0.0,
+        "eventual_rate": 0.0,
+        "attempts": 800,
+        "attempts_per_message": 4.0,
+        "mean_first_arrival_ticks": null,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 0
+      },
+      "store_forward": {
+        "on_time": 0,
+        "eventually_delivered": 0,
+        "on_time_rate": 0.0,
+        "eventual_rate": 0.0,
+        "attempts": 2000,
+        "attempts_per_message": 10.0,
+        "mean_first_arrival_ticks": null,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 0
+      },
+      "dual_path": {
+        "on_time": 0,
+        "eventually_delivered": 0,
+        "on_time_rate": 0.0,
+        "eventual_rate": 0.0,
+        "attempts": 4000,
+        "attempts_per_message": 20.0,
+        "mean_first_arrival_ticks": null,
+        "recovered_after_deadline": 0,
+        "duplicate_arrivals_suppressed": 0,
+        "unique_deliveries": 0
+      }
+    }
+  }
+}
