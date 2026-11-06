@@ -1,0 +1,22 @@
+name: KASPYRA Task 016 Field Link Harness
+on:
+  push:
+    paths:
+      - 'task016/**'
+      - 'task012/**'
+      - '.github/workflows/task016-field-link.yml'
+  workflow_dispatch:
+jobs:
+  field-link-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install crypto dependency
+        run: python -m pip install 'cryptography>=42,<47'
+      - name: Task 012 regression
+        run: python -m unittest discover -s task012 -p 'test_*.py' -v
+      - name: Task 016 local link tests
+        run: python -m unittest discover -s task016 -p 'test_*.py' -v
