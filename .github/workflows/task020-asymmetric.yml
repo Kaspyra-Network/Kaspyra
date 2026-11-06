@@ -1,0 +1,42 @@
+name: KASPYRA Task 020 Asymmetric Connectivity
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'task020/asymmetric.py'
+      - '.github/workflows/task020-asymmetric.yml'
+jobs:
+  asymmetric-connectivity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install isolated network tools
+        run: sudo apt-get update && sudo apt-get install -y iproute2 iputils-ping
+      - name: Install CometBFT v0.38.17
+        run: |
+          git clone --depth 1 --branch v0.38.17 https://github.com/cometbft/cometbft.git /tmp/cometbft
+          cd /tmp/cometbft
+          go build -o /usr/local/bin/cometbft ./cmd/cometbft
+          cometbft version
+      - name: Resolve KASPYRA Go dependencies
+        working-directory: task008c
+        run: |
+          go mod tidy
+          go mod verify
+      - name: Run asymmetric validator connectivity scenarios
+        run: sudo --preserve-env=PATH python task020/asymmetric.py
+      - name: Upload evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: task020-asymmetric-evidence
+          path: task020-asymmetric-evidence.json
+          if-no-files-found: error
