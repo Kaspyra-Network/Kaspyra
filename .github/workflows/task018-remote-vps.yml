@@ -1,0 +1,60 @@
+name: KASPYRA Task 018 Remote VPS Field Test
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  remote-field-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'cryptography>=42,<47'
+      - name: Prepare ephemeral credentials
+        shell: bash
+        env:
+          CA: ${{ secrets.KASPYRA018_CA_PEM }}
+          CERT: ${{ secrets.KASPYRA018_CLIENT_CERT_PEM }}
+          KEY: ${{ secrets.KASPYRA018_CLIENT_KEY_PEM }}
+          SIGNING: ${{ secrets.KASPYRA018_SIGNING_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/kaspyra018"
+          for var in CA CERT KEY SIGNING; do
+            [[ -n "${!var}" ]] || { echo "Missing secret: $var" >&2; exit 1; }
+          done
+          printf '%s\n' "$CA" > "$RUNNER_TEMP/kaspyra018/ca.pem"
+          printf '%s\n' "$CERT" > "$RUNNER_TEMP/kaspyra018/client.pem"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/kaspyra018/client.key"
+          printf '%s' "$SIGNING" | base64 -d > "$RUNNER_TEMP/kaspyra018/message.key"
+          test "$(stat -c %s "$RUNNER_TEMP/kaspyra018/message.key")" -eq 32
+      - name: Send signed test message through mTLS
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/kaspyra018"
+          echo 'KASPYRA018 remote link test (terrestrial internet)' > "$D/payload.txt"
+          python task016/field_link.py queue "$D/outbox.db" "$D/message.key" "$D/payload.txt" --ttl 300
+          python task017/secure_link.py client --bind 127.0.0.1 --port 18718 --remote-host 208.73.202.109 --remote-port 18443 --server-name 208.73.202.109 --ca "$D/ca.pem" --cert "$D/client.pem" --key "$D/client.key" --limit 1 > "$D/client.log" 2>&1 &
+          PROXY_PID=$!
+          trap 'kill "$PROXY_PID" 2>/dev/null || true' EXIT
+          sleep 1
+          python task016/field_link.py transmit "$D/outbox.db" --host 127.0.0.1 --port 18718 --timeout 12 > task018-evidence.json
+          python - <<'PY'
+          import json
+          result=json.load(open('task018-evidence.json'))
+          attempts=result.get('attempts',[])
+          assert len(attempts)==1 and attempts[0]['status']=='accepted', result
+          print('REMOTE_SIGNED_MESSAGE_ACCEPTED PASS')
+          print('ROUND_TRIP_MS',attempts[0]['round_trip_ms'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: task018-evidence
+          path: task018-evidence.json
+          if-no-files-found: ignore
