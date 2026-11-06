@@ -1,0 +1,19 @@
+name: KASPYRA Task 017 Remote Link Preparation
+on:
+  push:
+    paths:
+      - 'task017/**'
+      - '.github/workflows/task017-remote-link.yml'
+  workflow_dispatch:
+jobs:
+  remote-link-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify mTLS security and configuration
+        run: python -m unittest discover -s task017 -p 'test_*.py' -v
+      - name: Syntax validation
+        run: python -m py_compile task017/secure_link.py
