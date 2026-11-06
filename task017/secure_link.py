@@ -13,28 +13,35 @@ import time
 MAX_BYTES = 1024 * 1024
 
 
-def pipe(src, dst):
-    try:
-        while True:
-            chunk = src.recv(65536)
+def relay_frame(src, dst):
+    """Relay exactly one length-prefixed frame without socket half-close."""
+    import struct
+
+    def read_exact(sock, count):
+        data = bytearray()
+        while len(data) < count:
+            chunk = sock.recv(count - len(data))
             if not chunk:
-                try: dst.shutdown(socket.SHUT_WR)
-                except OSError: pass
-                break
-            dst.sendall(chunk)
-    except (OSError, ssl.SSLError):
-        pass
+                raise ConnectionError("unexpected EOF during framed relay")
+            data.extend(chunk)
+        return bytes(data)
+
+    header = read_exact(src, 4)
+    length = struct.unpack("!I", header)[0]
+    if length > MAX_BYTES:
+        raise ValueError("frame exceeds size limit")
+    dst.sendall(header + read_exact(src, length))
 
 
 def bridge(incoming, upstream_host, upstream_port):
     with incoming:
-        with socket.create_connection((upstream_host, upstream_port), timeout=10) as upstream:
+        with socket.create_connection(
+            (upstream_host, upstream_port), timeout=10
+        ) as upstream:
             incoming.settimeout(30)
             upstream.settimeout(30)
-            worker = threading.Thread(target=pipe, args=(incoming, upstream), daemon=True)
-            worker.start()
-            pipe(upstream, incoming)
-            worker.join(timeout=2)
+            relay_frame(incoming, upstream)
+            relay_frame(upstream, incoming)
 
 
 def contexts(ca, cert, key, server=False):
@@ -60,7 +67,8 @@ def serve(bind_host, bind_port, upstream_host, upstream_port, ca, cert, key, lim
             raw, _ = listener.accept()
             try:
                 tls = ctx.wrap_socket(raw, server_side=True)
-            except ssl.SSLError:
+            except ssl.SSLError as exc:
+                print(f"TLS_HANDSHAKE_ERROR: {exc}", flush=True)
                 raw.close()
                 continue
             count += 1
@@ -91,10 +99,8 @@ def bridge_client(local, tls):
     with local, tls:
         local.settimeout(30)
         tls.settimeout(30)
-        worker = threading.Thread(target=pipe, args=(local, tls), daemon=True)
-        worker.start()
-        pipe(tls, local)
-        worker.join(timeout=2)
+        relay_frame(local, tls)
+        relay_frame(tls, local)
 
 
 def main():
