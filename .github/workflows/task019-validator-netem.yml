@@ -29,6 +29,12 @@ jobs:
       - name: Verify Go dependencies
         working-directory: task008c
         run: go mod verify
+      - name: Resolve KASPYRA Go dependencies
+        working-directory: task008c
+        run: |
+          go mod tidy
+          go mod verify
+
       - name: Run four real validators with isolated NetEm links
         run: sudo --preserve-env=PATH python task019/validator_netem.py
       - name: Upload evidence even on failure
