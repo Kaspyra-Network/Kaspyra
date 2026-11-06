@@ -1,29 +1,24 @@
-# KASPYRA Task 008C — experimental CometBFT ABCI++ adapter
+# KASPYRA Task 008D — four-validator integration candidate
 
-**Status: source implementation supplied; NOT validated against CometBFT or a four-validator network.**
+This package adds a **real CometBFT process integration smoke test** to the existing `task008c/` application. It does not replace the existing code. Upload `task008d/` and `.github/workflows/task008d-network.yml` to the repository root.
 
-This package contains a Go ABCI++ socket application built around the existing Task 008 ledger logic, with CheckTx, PrepareProposal, ProcessProposal, FinalizeBlock, Commit, Info, and disk state persistence. It pins CometBFT v0.38.17 as a candidate dependency. Network access to Go module servers is unavailable in the package-building environment; **the Go adapter has not been compiled or executed here**. CI must determine whether the pinned API compiles, and failures require fixing before any validator test.
+## What the runner attempts
 
-## GitHub upload
+- Build the existing `task008c` ABCI application.
+- Generate four separate CometBFT validator identities and data directories with the **same genesis** and four validators.
+- Start four ABCI servers and four independent CometBFT processes on distinct loopback ports.
+- Generate ephemeral Ed25519 account keys, sign a transfer of 125 test units, and broadcast it through CometBFT RPC.
+- Check transaction inclusion, matching application hashes at the same height, all four persisted account balances, and restart of one consensus node.
 
-Upload `task008c/` and `.github/workflows/task008c-abci.yml` to repository root. Preserve previous task folders and workflows. Commit `feat: add experimental CometBFT ABCI adapter`.
+## Verification status
 
-## CI acceptance gates
+**UNVERIFIED against a live CometBFT network in the packaging environment.** The environment cannot retrieve the CometBFT Go module or binary. The GitHub Actions integration workflow is the first actual run and may uncover API/configuration incompatibilities. A passing test would demonstrate a local integration smoke test, **not** Byzantine security, network partition safety, or production readiness. Do not announce a working validator network before this job succeeds and logs are reviewed.
 
-1. GitHub Actions `KASPYRA Task 008C ABCI` downloads dependencies and compiles/tests successfully.
-2. Run four real CometBFT nodes with unique validator keys and four independent ABCI instances, matching chain ID and balances; capture their RPC status, block hashes, and app hashes.
-3. Broadcast a signed transfer and demonstrate four identical finalized app hashes.
-4. Restart a node, lose quorum, restore quorum, and prove consistent state without conflicting finalized blocks.
+## Upload and run
 
-**Do not mark Task 008C complete until all four gates pass.** This package does NOT include a verified four-validator harness. It is an integration candidate, not production code or a verified blockchain. No real funds.
+1. Upload `task008d/run_four_validators.py` and `.github/workflows/task008d-network.yml` preserving paths.
+2. Commit `test: add Task 008D four-validator integration harness`.
+3. Check the **KASPYRA Task 008D Four Validator Integration** workflow.
+4. If red, share the failing step and final error lines; preserve logs and correct the precise issue.
 
-## Known issues to address before real validator trials
-
-- ABCI API and CometBFT version compatibility must be confirmed by CI.
-- Proposal filtering, consensus-vote handling, InitChain and Query need complete protocol treatment.
-- Crash recovery between FinalizeBlock and Commit needs rigorous replay testing.
-- Disk persistence needs directory fsync, lock handling and corruption recovery.
-- Transaction pool admission must account for multiple pending transactions from the same sender.
-- Genesis balance file must be identical and validated on every node.
-- Hash uses ASCII hex bytes and is not a Merkle commitment.
-- No fees, staking, validator economics, snapshots, light-client proofs, bridge, or satellite transport.
+This uses test-only ephemeral keys and local ports. It does not accept funds, expose public RPC, or deploy a mainnet.
