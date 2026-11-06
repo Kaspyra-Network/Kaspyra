@@ -117,19 +117,31 @@ def measure_rtt():
         raise RuntimeError('Failed to measure validator-link RTT: '+(output.stdout+output.stderr)[-500:])
     return float(match.group(1))
 
-def partition(enable):
-    # Namespace-specific host routes take precedence over the connected /24.
-    # They block traffic in BOTH directions between the two groups.
+def partition(enable, majority=(0, 1)):
+    # Namespace-local routes. Never change host networking.
     for i in range(4):
         for j in range(4):
-            if (i<2)!=(j<2):
-                op='replace' if enable else 'del'
-                run('ip','-n',NS[i],'route',op,'unreachable',IPS[j]+'/32',check=enable)
+            if (i in majority) != (j in majority):
+                op = 'replace' if enable else 'del'
+                run(
+                    'ip', '-n', NS[i], 'route',
+                    op, 'unreachable', IPS[j] + '/32',
+                    check=True
+                )
+
     if enable:
+        # Both directions of every cross-group connection must fail.
         for i in range(4):
             for j in range(4):
-                if (i<2)!=(j<2) and net(i,'ping','-c','1','-W','1',IPS[j],check=False).returncode==0:
-                    raise RuntimeError('Partition route failed')
+                if (i in majority) != (j in majority):
+                    result = net(
+                        i, 'ping', '-c', '1', '-W', '1',
+                        IPS[j], check=False
+                    )
+                    if result.returncode == 0:
+                        raise RuntimeError(
+                            f'Partition isolation failed: {i}->{j}'
+                        )
 
 def main():
     report={'task':'019','phase':'real-validator-netem','status':'FAIL','satellite_verified':False,
@@ -213,6 +225,95 @@ def main():
             wait(lambda:all(len(peers(i))>=3 for i in range(4)),120,'partition peer recovery')
             wait(lambda:min(height(i) for i in range(4))>=max(after)+3,150,'partition block recovery')
             report['recovery']=snapshot()
+
+            # Phase 3: 3-1 majority/minority partition.
+            majority = (0, 1, 2)
+            minority = 3
+
+            wait(
+                lambda: all(len(peers(i)) >= 3 for i in range(4)),
+                90,
+                'phase3 initial full mesh'
+            )
+
+            phase3_start = snapshot()
+            partition(True, majority=majority)
+
+            for i, j in ((0, 1), (1, 2), (2, 0)):
+                result = net(
+                    i, 'ping', '-c', '2', '-W', '2',
+                    IPS[j], check=False
+                )
+                if result.returncode != 0:
+                    raise RuntimeError(
+                        f'Phase3 majority connectivity failed: {i}->{j}'
+                    )
+
+            # Cross-partition TCP connection attempts must fail.
+            for i, j in ((0, 3), (3, 0), (2, 3), (3, 2)):
+                probe = (
+                    "import socket,sys; "
+                    "s=socket.socket(); s.settimeout(2); "
+                    "rc=s.connect_ex((sys.argv[1],26656)); "
+                    "s.close(); sys.exit(0 if rc != 0 else 1)"
+                )
+                result = net(
+                    i, 'python3', '-c', probe,
+                    IPS[j], check=False
+                )
+                if result.returncode != 0:
+                    raise RuntimeError(
+                        f'Phase3 TCP isolation failed: {i}->{j}'
+                    )
+
+            time.sleep(8)
+            isolated_before = height(minority)
+            majority_before = [height(i) for i in majority]
+
+            wait(
+                lambda: min(height(i) for i in majority)
+                    >= max(majority_before) + 3,
+                120,
+                'phase3 majority progress'
+            )
+
+            isolated_after = height(minority)
+            if isolated_after != isolated_before:
+                raise RuntimeError(
+                    f'Isolated validator advanced: '
+                    f'{isolated_before}->{isolated_after}'
+                )
+
+            majority_after = [height(i) for i in majority]
+
+            report['phase3_partition'] = {
+                'split': '3-1',
+                'start': phase3_start,
+                'majority_before': majority_before,
+                'majority_after': majority_after,
+                'minority_before': isolated_before,
+                'minority_after': isolated_after,
+                'tcp_new_connections_blocked': True,
+                'verified': True
+            }
+
+            partition(False, majority=majority)
+
+            wait(
+                lambda: all(len(peers(i)) >= 3 for i in range(4)),
+                120,
+                'phase3 peer recovery'
+            )
+
+            target = max(majority_after) + 3
+            wait(
+                lambda: min(height(i) for i in range(4)) >= target,
+                150,
+                'phase3 block recovery'
+            )
+
+            report['phase3_recovery'] = snapshot()
+
             report['status']='PASS_WITH_STALLS' if any(x['outcome']=='STALL' for x in report['scenarios']) else 'PASS'
     except Exception as exc:
         report['error']=f'{type(exc).__name__}: {exc}'
