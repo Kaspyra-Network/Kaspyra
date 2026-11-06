@@ -1,0 +1,54 @@
+name: KASPYRA Task 013 Transport to Chain
+
+on:
+  push:
+    paths:
+      - 'task008c/**'
+      - 'task012/**'
+      - 'task013/**'
+      - '.github/workflows/task013-transport-chain.yml'
+  pull_request:
+    paths:
+      - 'task008c/**'
+      - 'task012/**'
+      - 'task013/**'
+      - '.github/workflows/task013-transport-chain.yml'
+  workflow_dispatch:
+
+jobs:
+  transport-to-chain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install cryptography
+        run: python -m pip install 'cryptography>=44,<47'
+      - name: Install CometBFT v0.38.17
+        run: |
+          git clone --depth 1 --branch v0.38.17 https://github.com/cometbft/cometbft.git /tmp/cometbft
+          cd /tmp/cometbft
+          go build -o /usr/local/bin/cometbft ./cmd/cometbft
+          cometbft version
+      - name: Resolve Go dependencies
+        working-directory: task008c
+        run: |
+          go mod tidy
+          go mod verify
+      - name: Run Task 012 transport unit tests
+        run: python -m unittest discover -s task012 -p 'test_*.py' -v
+      - name: Run four-validator transport-to-chain integration
+        run: python task013/run_transport_to_chain.py
+      - name: Upload experiment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: task013-evidence
+          path: task013-result.json
+          if-no-files-found: warn
