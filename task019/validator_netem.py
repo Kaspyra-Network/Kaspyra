@@ -200,7 +200,11 @@ def main():
                 snapshot()
             partition(True)
             # Allow existing TCP peer sessions to drop and consensus to settle.
-            wait(lambda:all(len(peers(i))<=1 for i in range(4)),60,'partition peer isolation')
+            # Check within-group connectivity; cross-group routes are checked by partition(True).
+            for i, j in ((0, 1), (1, 0), (2, 3), (3, 2)):
+                result = net(i, 'ping', '-c', '2', '-W', '2', IPS[j], check=False)
+                if result.returncode != 0:
+                    raise RuntimeError(f'Within-group connectivity failed: {i}->{j}')
             time.sleep(4); before=[height(i) for i in range(4)]
             time.sleep(12); after=[height(i) for i in range(4)]
             if before!=after:raise RuntimeError(f'Blocks advanced in 2/2 partition: {before}->{after}')
