@@ -1,0 +1,48 @@
+name: KASPYRA Task 013B Validator Link Experiment
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'task013b/**'
+      - 'task008c/**'
+      - '.github/workflows/task013b-validator-links.yml'
+  pull_request:
+    paths:
+      - 'task013b/**'
+      - 'task008c/**'
+      - '.github/workflows/task013b-validator-links.yml'
+
+jobs:
+  validator-links:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CometBFT v0.38.17
+        run: |
+          git clone --depth 1 --branch v0.38.17 https://github.com/cometbft/cometbft.git /tmp/cometbft
+          cd /tmp/cometbft
+          go build -o /usr/local/bin/cometbft ./cmd/cometbft
+          cometbft version
+      - name: Resolve Go dependencies
+        working-directory: task008c
+        run: |
+          go mod tidy
+          go mod verify
+      - name: Run real local validator P2P link experiment
+        run: python task013b/run_validator_link_experiment.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: task013b-evidence
+          path: task013b-result.json
+          if-no-files-found: warn
