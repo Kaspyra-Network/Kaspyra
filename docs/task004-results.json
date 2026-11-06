@@ -1,0 +1,64 @@
+{
+  "synthetic": true,
+  "trials": 40,
+  "shared_attempt_capacity_per_tick": 4,
+  "limitations": "Normal-approximation intervals across deterministic pseudo-random seeds; no measured satellite traces or consensus/finality",
+  "strategies": {
+    "fire_once": {
+      "mean_delivery_rate": 0.4900462962962963,
+      "delivery_ci95_normal_approx": [
+        0.48297599470751706,
+        0.49711659788507556
+      ],
+      "mean_ack_rate": 0.44907407407407407,
+      "ack_ci95_normal_approx": [
+        0.44018808412260507,
+        0.45796006402554307
+      ],
+      "mean_attempts": 60,
+      "mean_duplicates": 0
+    },
+    "retry": {
+      "mean_delivery_rate": 1.0,
+      "delivery_ci95_normal_approx": [
+        1.0,
+        1.0
+      ],
+      "mean_ack_rate": 1.0,
+      "ack_ci95_normal_approx": [
+        1.0,
+        1.0
+      ],
+      "mean_attempts": 133.525,
+      "mean_duplicates": 9.475
+    },
+    "store_forward": {
+      "mean_delivery_rate": 1.0,
+      "delivery_ci95_normal_approx": [
+        1.0,
+        1.0
+      ],
+      "mean_ack_rate": 1.0,
+      "ack_ci95_normal_approx": [
+        1.0,
+        1.0
+      ],
+      "mean_attempts": 133.525,
+      "mean_duplicates": 9.475
+    },
+    "dual_path": {
+      "mean_delivery_rate": 1.0,
+      "delivery_ci95_normal_approx": [
+        1.0,
+        1.0
+      ],
+      "mean_ack_rate": 1.0,
+      "ack_ci95_normal_approx": [
+        1.0,
+        1.0
+      ],
+      "mean_attempts": 133.15,
+      "mean_duplicates": 9.85
+    }
+  }
+}
